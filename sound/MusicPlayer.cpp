@@ -4,6 +4,8 @@
 
 #include "MusicPlayer.h"
 
+using namespace std;
+
 /**
  * MusicPlayerStateRunning
  */
@@ -117,7 +119,7 @@ void MusicPlayer::stop() {
         delete oldState;
 }
 
-void MusicPlayer::playSong(const std::wstring& newSong) {
+void MusicPlayer::playSong(const wstring& newSong) {
     stop();
     currentSongPath = newSong;
     play();
@@ -145,7 +147,7 @@ IMediaControl *MusicPlayer::getMediaControl() const {
     return mediaControl;
 }
 
-const std::wstring &MusicPlayer::getCurrentSongPath() const {
+const wstring &MusicPlayer::getCurrentSongPath() const {
     return currentSongPath;
 }
 

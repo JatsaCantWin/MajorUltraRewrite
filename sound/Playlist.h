@@ -6,18 +6,21 @@
 #define MAJORULTRAREWRITE_PLAYLIST_H
 
 #include <string>
-#include <vector>
+#include <list>
 #include <random>
 
 class Playlist {
     private:
-        std::default_random_engine randomEngine;
-        std::vector<std::wstring> songList;
-        std::vector<std::wstring>::iterator currentSong;
+        std::wstring name;
+        std::list<std::wstring> songList;
+        std::list<std::wstring>::iterator currentSong;
+        std::mt19937 * randomGenerator;
     public:
-        Playlist();
-        void addSong(const std::wstring& songPath);
+        explicit Playlist(const std::wstring& name);
+        ~Playlist();
+        void addSong(const std::wstring& newSong);
         std::wstring nextSong();
+        void moveIteratorToStart();
 };
 
 

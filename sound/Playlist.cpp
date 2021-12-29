@@ -4,29 +4,51 @@
 
 #include "Playlist.h"
 
-#include <algorithm>
-
 using namespace std;
 
-Playlist::Playlist() {
-    currentSong = songList.begin();
+Playlist::Playlist(const std::wstring& name) {
+    this->name = name;
 
-    auto randomDevice = random_device{};
-    randomEngine = default_random_engine { randomDevice() };
+    random_device rd;
+    randomGenerator = new mt19937(rd());
 }
 
-void Playlist::addSong(const wstring& songPath) {
-    songList.insert(songList.begin()+(rand() % songList.size()), songPath);
+Playlist::~Playlist() {
+    delete randomGenerator;
+}
+
+void Playlist::addSong(const std::wstring& newSong) {
+    std::uniform_int_distribution<unsigned int> randomPosition(0, songList.size());
+
+    auto randomSongListIterator = next(songList.begin(), randomPosition(*randomGenerator));
+
+    songList.insert(randomSongListIterator, newSong);
 }
 
 wstring Playlist::nextSong() {
+    if (songList.empty())
+        return L"";
+
     wstring result = *currentSong;
-    if (*currentSong == songList.back())
-    {
-        shuffle(begin(songList), end(songList), randomEngine);
-        if (result == songList.front())
-            std::reverse(songList.begin(), songList.end());
-    } else
-        advance(currentSong, 1);
+    auto nextIterator = next(currentSong);
+
+    std::uniform_int_distribution<unsigned int> randomPositionBeforeCurrentSong(0, distance(songList.begin(), currentSong));
+    auto randomSongListIterator = next(songList.begin(), randomPositionBeforeCurrentSong(*randomGenerator));
+
+    songList.splice(randomSongListIterator, songList, currentSong);
+
+    currentSong = nextIterator;
+
+    if (nextIterator == songList.end())
+        moveIteratorToStart();
+
     return result;
 }
+
+void Playlist::moveIteratorToStart() {
+    currentSong = songList.begin();
+}
+
+
+
+

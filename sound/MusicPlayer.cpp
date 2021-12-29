@@ -24,7 +24,8 @@ MusicPlayerState *MusicPlayerStateRunning::stop() {
     if (FAILED(parent->getMediaControl()->Stop()))
         return this;                                                                              //TODO: Error Handling
     parent->generateFilterGraphManager();                                                         //Regenerate Filter Graph Manager to
-    return new MusicPlayerStateStopped(parent);                                                   //stop current music from playing
+    return new MusicPlayerStateStopped(
+            parent);                                                   //stop current music from playing
 }
 
 MusicPlayerStateRunning::MusicPlayerStateRunning(MusicPlayer *parent) {
@@ -49,7 +50,8 @@ MusicPlayerState *MusicPlayerStatePaused::stop() {
     if (FAILED(parent->getMediaControl()->Stop()))
         return this;                                                                              //TODO: Error Handling
     parent->generateFilterGraphManager();                                                         //Regenerate Filter Graph Manager to
-    return new MusicPlayerStateStopped(parent);                                                   //stop current music from playing
+    return new MusicPlayerStateStopped(
+            parent);                                                   //stop current music from playing
 }
 
 MusicPlayerStatePaused::MusicPlayerStatePaused(MusicPlayer *parent) {
@@ -61,7 +63,8 @@ MusicPlayerStatePaused::MusicPlayerStatePaused(MusicPlayer *parent) {
  */
 
 MusicPlayerState *MusicPlayerStateStopped::play() {
-    if (FAILED(parent->getFilterGraphManager()->RenderFile(const_cast<wchar_t *>(parent->getCurrentSongPath().c_str()), nullptr)))
+    if (FAILED(parent->getFilterGraphManager()->RenderFile(const_cast<wchar_t *>(parent->getCurrentSongPath().c_str()),
+                                                           nullptr)))
         return this;                                                                              //TODO: Error Handling
     if (FAILED(parent->getMediaControl()->Run()))
         return this;                                                                              //TODO: Error Handling
@@ -85,7 +88,8 @@ MusicPlayerStateStopped::MusicPlayerStateStopped(MusicPlayer *parent) {
  */
 
 MusicPlayer::MusicPlayer() {
-    if (FAILED(CoInitialize(nullptr)))                                                                                                  //Initialize COM Library
+    if (FAILED(CoInitialize(
+            nullptr)))                                                                                                  //Initialize COM Library
         return;                                                                                                                             //TODO: Error handling
     generateFilterGraphManager();
     currentState = new MusicPlayerStateStopped(this);
@@ -99,43 +103,53 @@ MusicPlayer::~MusicPlayer() {
 }
 
 void MusicPlayer::play() {
-    MusicPlayerState * oldState = currentState;
+    MusicPlayerState *oldState = currentState;
     currentState = currentState->play();
     if (oldState != currentState)
         delete oldState;
 }
 
 void MusicPlayer::pause() {
-    MusicPlayerState * oldState = currentState;
+    MusicPlayerState *oldState = currentState;
     currentState = currentState->pause();
     if (oldState != currentState)
         delete oldState;
 }
 
 void MusicPlayer::stop() {
-    MusicPlayerState * oldState = currentState;
+    MusicPlayerState *oldState = currentState;
     currentState = currentState->stop();
     if (oldState != currentState)
         delete oldState;
 }
 
-void MusicPlayer::playSong(const wstring& newSong) {
+void MusicPlayer::playSong(const wstring &newSong) {
     stop();
     currentSongPath = newSong;
     play();
 }
 
+void MusicPlayer::playNextFromPlaylist() {
+    wstring nextSong = currentPlaylist->nextSong();
+    cout << "aaa";
+    if (!nextSong.empty())
+        playSong(nextSong);
+}
+
 void MusicPlayer::generateFilterGraphManager() {
-    if (filterGraphManager != nullptr){
+    if (filterGraphManager != nullptr) {
         mediaEvent->Release();
         mediaControl->Release();
         filterGraphManager->Release();
     }
-    if (FAILED(CoCreateInstance(CLSID_FilterGraph, nullptr, CLSCTX_INPROC_SERVER, IID_IGraphBuilder, (void **)&filterGraphManager)))    //Initialize Filter Graph Manager
+    if (FAILED(CoCreateInstance(CLSID_FilterGraph, nullptr, CLSCTX_INPROC_SERVER, IID_IGraphBuilder,
+                                (void **) &filterGraphManager)))    //Initialize Filter Graph Manager
         return;                                                                                                                             //TODO: Error handling
-    if (FAILED(filterGraphManager->QueryInterface(IID_IMediaControl, (void**)&mediaControl)))                                           //Initialize Media Control Interface
+    if (FAILED(filterGraphManager->QueryInterface(IID_IMediaControl,
+                                                  (void **) &mediaControl)))                                           //Initialize Media Control Interface
         return;                                                                                                                             //TODO: Error handling
-    if (FAILED(filterGraphManager->QueryInterface(IID_IMediaEvent, (void**)&mediaEvent)))                                               //Initialize Media Event Interface
+    if (FAILED(filterGraphManager->QueryInterface(IID_IMediaEvent,
+                                                  (void **) &mediaEvent)))                                               //Initialize Media Event Interface
         return;                                                                                                                             //TODO: Error handling                                                                                                                           //TODO: Error handling
 }
 
@@ -149,5 +163,9 @@ IMediaControl *MusicPlayer::getMediaControl() const {
 
 const wstring &MusicPlayer::getCurrentSongPath() const {
     return currentSongPath;
+}
+
+void MusicPlayer::setCurrentPlaylist(Playlist *newPlaylist) {
+    MusicPlayer::currentPlaylist = newPlaylist;
 }
 

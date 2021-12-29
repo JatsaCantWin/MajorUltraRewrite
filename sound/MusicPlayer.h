@@ -7,6 +7,7 @@
 
 #include <dshow.h>
 #include <string>
+#include "Playlist.h"
 
 class MusicPlayer;
 
@@ -51,11 +52,16 @@ class MusicPlayer {
         IMediaEvent *mediaEvent{};
         MusicPlayerState *currentState;
         std::wstring currentSongPath;
-    public:
+        Playlist * currentPlaylist;
+public:
+    void setCurrentPlaylist(Playlist *newPlaylist);
+
+public:
         void play();
         void pause();
         void stop();
         void playSong(const std::wstring& newSong);
+        void playNextFromPlaylist();
         void generateFilterGraphManager();
         MusicPlayer();
         ~MusicPlayer();

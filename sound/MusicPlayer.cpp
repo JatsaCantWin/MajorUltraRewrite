@@ -131,7 +131,6 @@ void MusicPlayer::playSong(const wstring &newSong) {
 
 void MusicPlayer::playNextFromPlaylist() {
     wstring nextSong = currentPlaylist->nextSong();
-    cout << "aaa";
     if (!nextSong.empty())
         playSong(nextSong);
 }

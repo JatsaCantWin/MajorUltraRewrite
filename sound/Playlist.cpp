@@ -49,6 +49,10 @@ void Playlist::moveIteratorToStart() {
     currentSong = songList.begin();
 }
 
+bool Playlist::isEmpty() {
+    return songList.empty();
+}
+
 
 
 

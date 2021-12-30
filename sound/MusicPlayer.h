@@ -52,22 +52,22 @@ class MusicPlayer {
         IMediaEvent *mediaEvent{};
         MusicPlayerState *currentState;
         std::wstring currentSongPath;
-        Playlist * currentPlaylist;
-public:
-    void setCurrentPlaylist(Playlist *newPlaylist);
-
-public:
+        Playlist * currentPlaylist{};
+    public:
         void play();
         void pause();
         void stop();
         void playSong(const std::wstring& newSong);
         void playNextFromPlaylist();
         void generateFilterGraphManager();
+        void startWaitForCompletionThread();
+        void waitForCompletion();
         MusicPlayer();
         ~MusicPlayer();
         [[nodiscard]] IGraphBuilder *getFilterGraphManager() const;
         [[nodiscard]] IMediaControl *getMediaControl() const;
         [[nodiscard]] const std::wstring &getCurrentSongPath() const;
+        void setCurrentPlaylist(Playlist *newPlaylist);
 };
 
 

@@ -21,6 +21,7 @@ class Playlist {
         void addSong(const std::wstring& newSong);
         std::wstring nextSong();
         void moveIteratorToStart();
+        bool isEmpty();
 };
 
 

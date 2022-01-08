@@ -3,15 +3,17 @@
 //
 
 #include "Terminal.h"
+#include "Parser.h"
+
 #include <windows.h>
 #include <conio.h>
+#include <iostream>
 
 void setCursorVisiblity(bool visibility)
 {
     HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
     CONSOLE_CURSOR_INFO cursorInfo;
     GetConsoleCursorInfo(consoleHandle, &cursorInfo);
-    //cursorInfo.dwSize = 100;
     cursorInfo.bVisible = visibility;
     SetConsoleCursorInfo(consoleHandle, &cursorInfo);
 }
@@ -24,17 +26,19 @@ InputState *InputStateTerminal::processChar(wint_t inputCharacter) {
     switch (inputCharacter)
     {
         case '`':
-            return new InputStateHotkey;
+            return new InputStateHotkey(terminal);
         case 13:
             _putwch('\n');
-            inputString = L"";
+            if (!inputString.empty())
+            {
+                terminal->parse(inputString);
+                inputString = L"";
+            }
             break;
         case 8:
             if (!inputString.empty())
             {
-                _putwch('\b');
-                _putwch(' ');
-                _putwch('\b');
+                backspace();
                 inputString.pop_back();
             }
             break;
@@ -48,18 +52,35 @@ InputState *InputStateTerminal::processChar(wint_t inputCharacter) {
     return this;
 }
 
-InputStateTerminal::InputStateTerminal() {
+InputStateTerminal::InputStateTerminal(Terminal * parentTerminal) {
     setCursorVisiblity(true);
+    terminal = parentTerminal;
 }
 
 InputStateTerminal::~InputStateTerminal() {
     while (!inputString.empty())
     {
-        _putwch('\b');
-        _putwch(' ');
-        _putwch('\b');
+        backspace();
         inputString.pop_back();
     }
+}
+
+void InputStateTerminal::displayMessage(const std::wstring& message) {
+    for(int i=0; i<inputString.length(); i++)
+        backspace();
+    _putws(message.c_str());
+    for (int i=0; i<inputString.length(); i++)
+        _putch(inputString[i]);
+}
+
+void InputStateTerminal::backspace() {
+    _putwch('\b');
+    _putwch(' ');
+    _putwch('\b');
+}
+
+void InputStateTerminal::clearInputString() {
+    inputString = L"";
 }
 
 /**
@@ -70,15 +91,24 @@ InputState *InputStateHotkey::processChar(wint_t inputCharacter) {
     switch (inputCharacter)
     {
         case '`':
-            return new InputStateTerminal;
+            return new InputStateTerminal(terminal);
         default:
             break;
     }
     return this;
 }
 
-InputStateHotkey::InputStateHotkey() {
+InputStateHotkey::InputStateHotkey(Terminal * parentTerminal) {
     setCursorVisiblity(false);
+    terminal = parentTerminal;
+}
+
+void InputStateHotkey::displayMessage(const std::wstring& message) {
+
+}
+
+void InputStateHotkey::clearInputString() {
+
 }
 
 /**
@@ -86,7 +116,8 @@ InputStateHotkey::InputStateHotkey() {
  */
 
 Terminal::Terminal() {
-    inputState = new InputStateTerminal;
+    inputState = new InputStateTerminal(this);
+    parser = new Parser(this);
 }
 
 void Terminal::readCharacter() {
@@ -104,4 +135,16 @@ void Terminal::processCharacter(wint_t character) {
     inputState = inputState->processChar(character);
     if (oldState != inputState)
         delete oldState;
+}
+
+void Terminal::displayMessage(const std::wstring& message) {
+    inputState->displayMessage(message);
+}
+
+void Terminal::parse(const std::wstring& inputString) {
+    parser->parse(inputString);
+}
+
+void Terminal::clearInputString() {
+    inputState->clearInputString();
 }

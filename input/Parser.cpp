@@ -3,15 +3,16 @@
 //
 
 #include "Parser.h"
-#include "commands/Command.h"
 #include <sstream>
 #include <exception>
 #include <iostream>
 
 using namespace std;
 
-Parser::Parser(Terminal * parentTerminal) {
-    terminal = parentTerminal;
+Parser* Parser::instance = nullptr;
+
+Parser::Parser() {
+    commands = new Commands();
 }
 
 void Parser::parse(const wstring& command) {
@@ -36,15 +37,21 @@ vector<wstring> Parser::tokenize(const wstring& command) {
 bool Parser::execute(const vector<wstring>& tokens) {
     try {
         vector<wstring> arguments(tokens.begin() + 1, tokens.end());
-        Commands::getCommand(tokens[0])->execute(arguments);
+        commands->getCommand(tokens[0])->execute(arguments);
     }
     catch(invalid_argument& e){
-        terminal->clearInputString();
+        Terminal::getInstance().clearInputString();
         string message = e.what();
         wstring wmessage;
         for (auto c:message)
             wmessage.push_back(c);
-        terminal->displayMessage(wmessage);
+        Terminal::getInstance().displayMessage(wmessage);
     }
     return true;
+}
+
+Parser Parser::getInstance() {
+    if (instance == nullptr)
+        instance = new Parser();
+    return *instance;
 }

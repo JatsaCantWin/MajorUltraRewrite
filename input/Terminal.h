@@ -9,7 +9,6 @@
 #include <string>
 #include "Parser.h"
 
-class Parser;
 class Terminal;
 
 class InputState {
@@ -43,12 +42,15 @@ class InputStateHotkey: public InputState {
         InputStateHotkey(Terminal * parentTerminal);
 };
 
+class Parser;
+
 class Terminal {
     private:
         InputState * inputState;
-        Parser * parser;
-    public:
+        static Terminal * instance;
         Terminal();
+    public:
+        static Terminal getInstance();
         void clearInputString();
         void parse(const std::wstring& inputString);
         void readCharacter();

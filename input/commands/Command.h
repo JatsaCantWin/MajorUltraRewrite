@@ -9,8 +9,6 @@
 #include <map>
 #include <string>
 
-class Commands;
-
 class Command {
     public:
         virtual bool execute(std::vector<std::wstring> arguments) = 0;
@@ -18,10 +16,10 @@ class Command {
 
 class Commands {
     private:
-        inline static std::map<std::wstring, Command*> commandDictionary;
-        static void Initialize();
+        std::map<std::wstring, Command*> commandDictionary;
     public:
-        static Command * getCommand(const std::wstring& commandName);
+        Commands();
+        Command * getCommand(const std::wstring& commandName);
 };
 
 #endif //MAJORULTRAREWRITE_COMMAND_H

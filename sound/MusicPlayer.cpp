@@ -4,8 +4,10 @@
 
 #include "MusicPlayer.h"
 #include "windows.h"
+#include "../input/Terminal.h"
 
 #include <stdexcept>
+#include <iostream>
 
 using namespace std;
 
@@ -24,6 +26,7 @@ MusicPlayerState *MusicPlayerStateRunning::pause() {
 }
 
 MusicPlayerState *MusicPlayerStateRunning::stop() {
+    parent->stopCompletionThreadFlag = true;
     if (FAILED(parent->getMediaControl()->Stop()))
         return this;                                                                              //TODO: Error Handling
     parent->generateFilterGraphManager();                                                         //Regenerate Filter Graph Manager to
@@ -132,14 +135,27 @@ void MusicPlayer::playSong(const wstring &newSong) {
 }
 
 void MusicPlayer::playNextFromPlaylist() {
-    if (currentPlaylist == nullptr)
-        throw logic_error("There is no current playlist");
-    if (currentPlaylist->isEmpty())
-        throw logic_error("There are no songs in the current playlist");
-
-    wstring nextSong = currentPlaylist->nextSong();
-    if (!nextSong.empty())
-        playSong(nextSong);
+    try
+    {
+        if (currentPlaylist == nullptr)
+            throw logic_error("Nie wybrano zadnej playlisty.");
+        while ((not currentPlaylist->isEmpty()) and (not currentPlaylist->checkCurrentSongsValidity()));
+        if (currentPlaylist->isEmpty())
+        {
+            throw logic_error("Obecna playlista jest pusta. Zatrzymano odtwarzanie.");
+        }
+        wstring nextSong = currentPlaylist->nextSong();
+        if (!nextSong.empty())
+            playSong(nextSong);
+    }
+    catch (logic_error& e)
+    {
+        string message = e.what();
+        wstring wmessage;
+        for (auto c:message)
+            wmessage.push_back(c);
+        Terminal::getInstance().displayMessage(wmessage);
+    }
 }
 
 void MusicPlayer::generateFilterGraphManager() {
@@ -182,10 +198,17 @@ DWORD WINAPI waitForCompletionThread(LPVOID lpParameter)
 {
     auto * musicPlayer = (MusicPlayer *) lpParameter;
     musicPlayer->waitForCompletion();
-    musicPlayer->playNextFromPlaylist();
+    if (not musicPlayer->stopCompletionThreadFlag)
+        musicPlayer->playNextFromPlaylist();
     return 0;
 }
 
 void MusicPlayer::startWaitForCompletionThread() {
+    stopCompletionThreadFlag = false;
     CreateThread(nullptr, 0, waitForCompletionThread, this, 0, nullptr);
+}
+
+MusicPlayer &MusicPlayer::getInstance() {
+    static MusicPlayer instance;
+    return instance;
 }

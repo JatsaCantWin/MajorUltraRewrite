@@ -8,14 +8,18 @@
 #include <vector>
 #include <string>
 #include "Terminal.h"
+#include "commands/Command.h"
 
 class Terminal;
+class Commands;
 
 class Parser {
     private:
-        Terminal * terminal;
+        Commands * commands;
+        static Parser * instance;
+        explicit Parser();
     public:
-        explicit Parser(Terminal * parentTerminal);
+        static Parser getInstance();
         void parse(const std::wstring& command);
         std::vector<std::wstring> tokenize(const std::wstring& command);
         bool execute(const std::vector<std::wstring>& tokens);

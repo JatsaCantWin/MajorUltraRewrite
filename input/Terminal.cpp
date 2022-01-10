@@ -3,11 +3,12 @@
 //
 
 #include "Terminal.h"
-#include "Parser.h"
 
 #include <windows.h>
 #include <conio.h>
 #include <iostream>
+
+Terminal* Terminal::instance = nullptr;
 
 void setCursorVisiblity(bool visibility)
 {
@@ -31,8 +32,9 @@ InputState *InputStateTerminal::processChar(wint_t inputCharacter) {
             _putwch('\n');
             if (!inputString.empty())
             {
-                terminal->parse(inputString);
-                inputString = L"";
+                auto command = inputString;
+                clearInputString();
+                terminal->parse(command);
             }
             break;
         case 8:
@@ -69,8 +71,8 @@ void InputStateTerminal::displayMessage(const std::wstring& message) {
     for(int i=0; i<inputString.length(); i++)
         backspace();
     _putws(message.c_str());
-    for (int i=0; i<inputString.length(); i++)
-        _putch(inputString[i]);
+    for (wchar_t i : inputString)
+        _putch(i);
 }
 
 void InputStateTerminal::backspace() {
@@ -115,9 +117,10 @@ void InputStateHotkey::clearInputString() {
  * Terminal
  */
 
+using namespace std;
+
 Terminal::Terminal() {
     inputState = new InputStateTerminal(this);
-    parser = new Parser(this);
 }
 
 void Terminal::readCharacter() {
@@ -142,9 +145,15 @@ void Terminal::displayMessage(const std::wstring& message) {
 }
 
 void Terminal::parse(const std::wstring& inputString) {
-    parser->parse(inputString);
+    Parser::getInstance().parse(inputString);
 }
 
 void Terminal::clearInputString() {
     inputState->clearInputString();
+}
+
+Terminal Terminal::getInstance() {
+    if (instance == nullptr)
+        instance = new Terminal();
+    return *instance;
 }

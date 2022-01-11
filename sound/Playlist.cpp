@@ -3,6 +3,7 @@
 //
 
 #include <filesystem>
+#include <iostream>
 #include "Playlist.h"
 #include "../input/Terminal.h"
 
@@ -14,6 +15,7 @@ Playlist::Playlist(const std::wstring& name) {
     this->name = name;
     random_device rd;
     randomGenerator = new mt19937(rd());
+    moveIteratorToStart();
 }
 
 Playlist::~Playlist() {
@@ -29,6 +31,8 @@ void Playlist::addSong(const std::wstring& newSong) {
 }
 
 void Playlist::removeSong(const wstring &songPath) {
+    if (songPath == *currentSong)
+        nextSong();
     songList.remove(songPath);
 }
 
@@ -48,6 +52,7 @@ wstring Playlist::nextSong() {
 
     if (nextIterator == songList.end())
         moveIteratorToStart();
+
     return result;
 }
 

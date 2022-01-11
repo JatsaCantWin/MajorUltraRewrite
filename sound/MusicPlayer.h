@@ -55,7 +55,6 @@ class MusicPlayer {
         Playlist * currentPlaylist{};
         MusicPlayer();
     public:
-        bool stopCompletionThreadFlag;
         static MusicPlayer& getInstance();
         ~MusicPlayer();
         void play();
@@ -64,12 +63,12 @@ class MusicPlayer {
         void playSong(const std::wstring& newSong);
         void playNextFromPlaylist();
         void generateFilterGraphManager();
-        void startWaitForCompletionThread();
-        void waitForCompletion();
+        void checkIfMusicIsCompleted();
         [[nodiscard]] IGraphBuilder *getFilterGraphManager() const;
         [[nodiscard]] IMediaControl *getMediaControl() const;
         [[nodiscard]] const std::wstring &getCurrentSongPath() const;
         void setCurrentPlaylist(Playlist *newPlaylist);
+        Playlist * getCurrentPlaylist();
 };
 
 

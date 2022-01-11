@@ -26,7 +26,6 @@ MusicPlayerState *MusicPlayerStateRunning::pause() {
 }
 
 MusicPlayerState *MusicPlayerStateRunning::stop() {
-    parent->stopCompletionThreadFlag = true;
     if (FAILED(parent->getMediaControl()->Stop()))
         return this;                                                                              //TODO: Error Handling
     parent->generateFilterGraphManager();                                                         //Regenerate Filter Graph Manager to
@@ -70,7 +69,7 @@ MusicPlayerState *MusicPlayerStateStopped::play() {
     if (FAILED(parent->getFilterGraphManager()->RenderFile(const_cast<wchar_t *>(parent->getCurrentSongPath().c_str()), nullptr)))
         return this;                                                                              //TODO: Error Handling
     if (FAILED(parent->getMediaControl()->Run()))
-        return this;                                                                              //TODO: Error Handling
+        return this;                                                                              //TODO: Error Handlin
     return new MusicPlayerStateRunning(parent);
 }
 
@@ -111,7 +110,6 @@ void MusicPlayer::play() {
     currentState = currentState->play();
     if (oldState != currentState)
         delete oldState;
-    startWaitForCompletionThread();
 }
 
 void MusicPlayer::pause() {
@@ -189,26 +187,20 @@ void MusicPlayer::setCurrentPlaylist(Playlist *newPlaylist) {
     currentPlaylist->moveIteratorToStart();
 }
 
-void MusicPlayer::waitForCompletion() {
-    long result;
-    mediaEvent->WaitForCompletion(INFINITE, &result);
-}
-
-DWORD WINAPI waitForCompletionThread(LPVOID lpParameter)
-{
-    auto * musicPlayer = (MusicPlayer *) lpParameter;
-    musicPlayer->waitForCompletion();
-    if (not musicPlayer->stopCompletionThreadFlag)
-        musicPlayer->playNextFromPlaylist();
-    return 0;
-}
-
-void MusicPlayer::startWaitForCompletionThread() {
-    stopCompletionThreadFlag = false;
-    CreateThread(nullptr, 0, waitForCompletionThread, this, 0, nullptr);
-}
-
 MusicPlayer &MusicPlayer::getInstance() {
     static MusicPlayer instance;
     return instance;
+}
+
+void MusicPlayer::checkIfMusicIsCompleted() {
+    if (dynamic_cast<const MusicPlayerStateRunning*>(currentState) != nullptr)
+    {
+        long result;
+        if (mediaEvent->WaitForCompletion(10, &result) != E_ABORT)
+            playNextFromPlaylist();
+    }
+}
+
+Playlist * MusicPlayer::getCurrentPlaylist() {
+    return currentPlaylist;
 }

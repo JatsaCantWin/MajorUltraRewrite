@@ -8,11 +8,9 @@
 #include "../../sound/PlaylistContainer.h"
 
 bool CommandPlay::execute(std::vector<std::wstring> arguments) {
-    MusicPlayer::getInstance().stop();
-    std::cout <<"daadwawd" << std::endl;
     if (not arguments.empty())
         MusicPlayer::getInstance().setCurrentPlaylist(PlaylistContainer::getInstance().getPlaylist(arguments[0]));
-    std::cout <<"zxzxzxzzx" << std::endl;
-    MusicPlayer::getInstance().play();
+    MusicPlayer::getInstance().stop();
+    MusicPlayer::getInstance().playNextFromPlaylist();
     return true;
 }

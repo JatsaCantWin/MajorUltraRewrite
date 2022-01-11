@@ -124,6 +124,8 @@ Terminal::Terminal() {
 }
 
 void Terminal::readCharacter() {
+    if (not kbhit())
+        return;
     wchar_t characterRead = _getwch();
     if ((characterRead == 0)||(characterRead==0xE0))
     {

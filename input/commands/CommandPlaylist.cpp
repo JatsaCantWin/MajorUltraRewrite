@@ -5,12 +5,16 @@
 #include "CommandPlaylist.h"
 #include "CommandPlaylistAdd.h"
 #include "CommandPlaylistPrint.h"
+#include "CommandPlaylistRemove.h"
+#include "CommandPlaylistDelete.h"
 
 #include <iostream>
 
 CommandPlaylist::CommandPlaylist() {
     subCommands[L"add"] = new CommandPlaylistAdd();
     subCommands[L"print"] = new CommandPlaylistPrint();
+    subCommands[L"remove"] = new CommandPlaylistRemove();
+    subCommands[L"delete"] = new CommandPlaylistDelete();
 }
 
 bool CommandPlaylist::execute(std::vector<std::wstring> arguments) {

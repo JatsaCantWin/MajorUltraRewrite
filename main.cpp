@@ -13,6 +13,7 @@ using namespace std;
 int main() {
     while (true){
         Terminal::getInstance().readCharacter();
+        MusicPlayer::getInstance().checkIfMusicIsCompleted();
     }
     return 0;
 }

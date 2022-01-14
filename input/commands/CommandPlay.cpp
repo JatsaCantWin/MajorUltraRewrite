@@ -10,7 +10,6 @@
 bool CommandPlay::execute(std::vector<std::wstring> arguments) {
     if (not arguments.empty())
         MusicPlayer::getInstance().setCurrentPlaylist(PlaylistContainer::getInstance().getPlaylist(arguments[0]));
-    MusicPlayer::getInstance().stop();
-    MusicPlayer::getInstance().playNextFromPlaylist();
+    MusicPlayer::getInstance().play();
     return true;
 }

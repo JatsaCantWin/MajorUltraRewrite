@@ -61,12 +61,13 @@ class MusicPlayer {
         void pause();
         void stop();
         void playSong(const std::wstring& newSong);
-        void playNextFromPlaylist();
+        std::wstring selectNextFromPlaylist();
         void generateFilterGraphManager();
         void checkIfMusicIsCompleted();
         [[nodiscard]] IGraphBuilder *getFilterGraphManager() const;
         [[nodiscard]] IMediaControl *getMediaControl() const;
         [[nodiscard]] const std::wstring &getCurrentSongPath() const;
+        void setCurrentSongPath(const std::wstring &newSongPath);
         void setCurrentPlaylist(Playlist *newPlaylist);
         Playlist * getCurrentPlaylist();
 };

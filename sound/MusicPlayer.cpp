@@ -66,6 +66,8 @@ MusicPlayerStatePaused::MusicPlayerStatePaused(MusicPlayer *parent) {
  */
 
 MusicPlayerState *MusicPlayerStateStopped::play() {
+    if (parent->getCurrentSongPath().empty())
+        parent->setCurrentSongPath(parent->selectNextFromPlaylist());
     if (FAILED(parent->getFilterGraphManager()->RenderFile(const_cast<wchar_t *>(parent->getCurrentSongPath().c_str()), nullptr)))
         return this;                                                                              //TODO: Error Handling
     if (FAILED(parent->getMediaControl()->Run()))
@@ -132,7 +134,7 @@ void MusicPlayer::playSong(const wstring &newSong) {
     play();
 }
 
-void MusicPlayer::playNextFromPlaylist() {
+wstring MusicPlayer::selectNextFromPlaylist() {
     try
     {
         if (currentPlaylist == nullptr)
@@ -142,9 +144,7 @@ void MusicPlayer::playNextFromPlaylist() {
         {
             throw logic_error("Obecna playlista jest pusta. Zatrzymano odtwarzanie.");
         }
-        wstring nextSong = currentPlaylist->nextSong();
-        if (!nextSong.empty())
-            playSong(nextSong);
+        return  currentPlaylist->nextSong();
     }
     catch (logic_error& e)
     {
@@ -153,6 +153,7 @@ void MusicPlayer::playNextFromPlaylist() {
         for (auto c:message)
             wmessage.push_back(c);
         Terminal::getInstance().displayMessage(wmessage);
+        return L"";
     }
 }
 
@@ -197,10 +198,14 @@ void MusicPlayer::checkIfMusicIsCompleted() {
     {
         long result;
         if (mediaEvent->WaitForCompletion(10, &result) != E_ABORT)
-            playNextFromPlaylist();
+            playSong(selectNextFromPlaylist());
     }
 }
 
 Playlist * MusicPlayer::getCurrentPlaylist() {
     return currentPlaylist;
+}
+
+void MusicPlayer::setCurrentSongPath(const wstring &newSongPath) {
+    currentSongPath = newSongPath;
 }

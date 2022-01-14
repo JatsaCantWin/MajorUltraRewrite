@@ -5,6 +5,7 @@
 #include "CommandPlaylistAdd.h"
 #include "../../sound/PlaylistContainer.h"
 #include <iostream>
+#include <filesystem>
 
 using namespace std;
 
@@ -19,7 +20,14 @@ bool CommandPlaylistAdd::execute(std::vector<std::wstring> arguments) {
 
     for (auto currentArgument = arguments.begin() + 1; currentArgument != arguments.end(); currentArgument++)
     {
-        PlaylistContainer::getInstance().addSong(arguments[0], *currentArgument);
+        if (filesystem::is_directory(*currentArgument))
+        {
+            for (const auto &file: filesystem::directory_iterator(*currentArgument))
+                if (Playlist::isValidSong(file.path()))
+                    PlaylistContainer::getInstance().addSong(arguments[0], file.path());
+        }
+        else
+            PlaylistContainer::getInstance().addSong(arguments[0], *currentArgument);
     }
     return true;
 }

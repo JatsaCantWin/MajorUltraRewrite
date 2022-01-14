@@ -23,6 +23,9 @@ Playlist::~Playlist() {
 }
 
 void Playlist::addSong(const std::wstring& newSong) {
+    if (find(songList.begin(), songList.end(), newSong) != songList.end())
+        return;
+
     std::uniform_int_distribution<unsigned int> randomPosition(0, songList.size());
 
     auto randomSongListIterator = next(songList.begin(), randomPosition(*randomGenerator));
@@ -47,7 +50,6 @@ wstring Playlist::nextSong() {
     auto randomSongListIterator = next(songList.begin(), randomPositionBeforeCurrentSong(*randomGenerator));
 
     songList.splice(randomSongListIterator, songList, currentSong);
-
     currentSong = nextIterator;
 
     if (nextIterator == songList.end())

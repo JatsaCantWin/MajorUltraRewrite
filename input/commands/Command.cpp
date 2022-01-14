@@ -8,6 +8,7 @@
 #include "CommandPause.h"
 #include "CommandPlay.h"
 #include "CommandStop.h"
+#include "CommandNext.h"
 
 #include <iostream>
 #include <exception>
@@ -27,4 +28,5 @@ Commands::Commands() {
     commandDictionary[L"play"] = new CommandPlay();
     commandDictionary[L"stop"] = new CommandStop();
     commandDictionary[L"pause"] = new CommandPause();
+    commandDictionary[L"next"] = new CommandNext();
 }

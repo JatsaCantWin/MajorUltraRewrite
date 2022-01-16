@@ -27,7 +27,11 @@ InputState *InputStateTerminal::processChar(wint_t inputCharacter) {
     switch (inputCharacter)
     {
         case '`':
-            return new InputStateHotkey(terminal);
+        {
+            auto result = new InputStateHotkey(terminal);
+            std::cout << std::endl << "a: " << result << std::endl;
+            return result;
+        }
         case 13:
             _putwch('\n');
             if (!inputString.empty())
@@ -106,7 +110,7 @@ InputStateHotkey::InputStateHotkey(Terminal * parentTerminal) {
 }
 
 void InputStateHotkey::displayMessage(const std::wstring& message) {
-
+    _putws(message.c_str());
 }
 
 void InputStateHotkey::clearInputString() {
@@ -133,11 +137,14 @@ void Terminal::readCharacter() {
         return;
     }
     this->processCharacter(characterRead);
+    cout << endl << "d: " << inputState << endl;
 }
 
 void Terminal::processCharacter(wint_t character) {
     InputState * oldState = inputState;
+    cout << endl << "c: " << inputState;
     inputState = inputState->processChar(character);
+    cout << endl << "b: " << inputState;
     if (oldState != inputState)
         delete oldState;
 }
